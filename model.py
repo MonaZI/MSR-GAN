@@ -41,6 +41,6 @@ class Net(nn.Module):
         """
         classname = m.__class__.__name__
         if (classname.find('Conv') != -1) or (classname.find('Linear') != -1):
-            m.weight.data.normal_(0.0, 0.01) #0.01 earlier, I changed it for MSR-GAN
+            m.weight.data.normal_(0.0, 0.01)
             m.bias.data.fill_(0)
 
