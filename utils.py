@@ -11,12 +11,6 @@ import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
 
-def one_sided(x):
-    out = F.relu(-x)
-    out = -1. * out.mean()
-    return out
-
-
 def meas_gen_shift_tensor(alpha, shifts, args):
     """
     Generates different shifted versions of the signals
@@ -212,25 +206,7 @@ def gumbel_softmax_sampler(pdf, num_meas, tau):
     tmp = torch.exp((torch.log(pdf)+g)/tau)/torch.sum(torch.exp((torch.log(pdf)+g)/tau), dim=1).unsqueeze(1)
     shift_probs = tmp
 
-    #start2 = time.time()
-    #for i in range(num_meas):
-    #    g = -torch.log(-torch.log(torch.rand(size=pdf.shape)))
-    #    if pdf.is_cuda: g = g.cuda()
-    #    shifts[i] = torch.argmax(torch.log(pdf)+g).int()
-    #    tmp = torch.exp((torch.log(pdf)+g)/tau)/torch.sum(torch.exp((torch.log(pdf)+g)/tau))
-    #    shift_probs[i, :] = tmp
-    #end2 = time.time()-start2
-    #print(end1, end2)
-    #import pdb; pdb.set_trace()
     return shift_probs, shifts
-
-
-def sig_dna_gen(sig_len):
-    alphabet = [0., 1., 2., 3.]
-    x = np.zeros((sig_len,))
-    for i in range(sig_len):
-        x[i] = (alphabet[int(np.random.randint(0, high=4, size=1))] - 1.5) /3.
-    return x
 
 
 def sig_from_a(a, sig_len):
@@ -251,28 +227,6 @@ def sig_from_a(a, sig_len):
         for count, ak in enumerate(a):
             x = x + ak * np.sin((2*math.pi*count*t)/sig_len)
     return x
-
-
-def grad_signal_from_a(a, sig_len):
-    """
-    Computes the gradient of the signal based on the given coefficients
-    :param a: the coefficients of the signal
-    :param sig_len: the length of the signal
-    :return: the gradient of the signal
-    """
-    t = torch.arange(0., sig_len)
-    x = torch.zeros((sig_len, ))
-    for count, ak in enumerate(a):
-        x = x + (2 * math.pi * count / sig_len) * ak * torch.cos((2*math.pi*count*t)/sig_len)
-    return x
-
-
-def grad_signal(sig):
-    tmp = torch.cat((sig[1:],sig[0].unsqueeze(0)))
-    #tmp = np.linspace(0, 2*math.pi, len(sig))
-    return sig-tmp
-    #tmp = -6*np.sin(3*tmp)+2*np.cos(tmp)
-    #return torch.tensor(tmp).float()
 
 
 def random_seed(seed):

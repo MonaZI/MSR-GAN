@@ -9,10 +9,8 @@ from dataloader import Dataset, get_loader
 from torch import cuda
 import torch
 
-from model import Net, pdfNet
-from trainer_new import TrainerWithPDFMoment
+from model import Net
 from trainer_gumbel import TrainerWithPDFGumbel
-#from trainer_all_shifts import TrainerWithPDFGumbel
 
 
 def main(args):
@@ -52,14 +50,7 @@ def main(args):
     print(args)
 
     net = Net(args)
-    net_enc = pdfNet(args)
-    if args.moment:
-        # check the moments generated from the measurements and the signal
-        moment_meas = gen_moment_meas(meas)
-        moment_gt = gen_moment(torch.tensor(sig), torch.tensor(pdf), args.mask_len)
-        trainer = TrainerWithPDFMoment(net, torch.tensor(moment_meas).float(), meas, dataloader, args)
-    elif args.gumbel:
-        trainer = TrainerWithPDFGumbel(net, meas, dataloader, args)
+    trainer = TrainerWithPDFGumbel(net, meas, dataloader, args)
     sig_pred = trainer.train(sig, pdf, meas)
     find_dist(sig_pred, sig, args.expName)
     print("Finished!")

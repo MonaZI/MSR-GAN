@@ -52,17 +52,9 @@ class TrainerAbstract(object):
         :return: nothing is returned
         """
         for param_group in self.optim_net.param_groups:
-            param_group['lr'] *= self.args.gamma_lrate #0.92
-        #for param_group in self.optim_encoder.param_groups:
-        #    param_group['lr'] *= self.args.gamma_lrate #0.92
-        #for param_group in self.optim_x.param_groups:
-        #    param_group['lr'] *= self.args.gamma_lrate 
-        #if not self.args.correct_pdf:
-        #    for param_group in self.optim_pdf.param_groups:
-        #        param_group['lr'] *= self.args.gamma_lrate #0.92
+            param_group['lr'] *= self.args.gamma_lrate
 
-
-    def train(self, x_true, p_true, meas): # alpha_true after x_true
+    def train(self, x_true, p_true, meas):
         """
         Trains and saves the trained model
         :param x_true: the gt signal, only used for comparison with the recon signal

@@ -1,6 +1,7 @@
 import torch
 import torch.utils.data as data
 
+
 class Dataset(data.Dataset):
     def __init__(self, meas, args, shifts=None):
         """
@@ -11,12 +12,10 @@ class Dataset(data.Dataset):
         self.args = args
         self.meas = meas
         self.num_samples = len(self.meas)
-        if not (shifts is None):
-            self.shifts = shifts
         print('The number of samples: %d' %(self.num_samples))
 
     def __getitem__(self, index):
-        return self.meas[index, :]#, self.shifts[index]
+        return self.meas[index, :]
 
     def __len__(self):
         return self.num_samples
@@ -28,13 +27,8 @@ def collate_fn(data):
     :param data: the data in form of numpy array
     :return: the data in torch.tensor
     """
-    #meas, shifts = zip(*data)
-    meas = data
-    # adding the dimensionality corresponding to the number of channels
-    # here for the input, we only have one channel
-    meas = torch.tensor(meas).unsqueeze(1).float()
-    #shifts = torch.tensor(shifts).unsqueeze(1).float()
-    return meas#, shifts
+    meas = torch.tensor(data).float()
+    return meas
 
 
 def get_loader(dataset, args, is_test=False):
