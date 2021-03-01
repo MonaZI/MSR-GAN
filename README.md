@@ -15,11 +15,11 @@ Link to paper (arxiv): https://arxiv.org/abs/2102.09494
 Examples of how to run the code for three different scenarios are given below:
 - Unknown PMF
 ```r
-python main_wpdf.py -lrate 0.005 -batch_size 200 -gumbel -num_epoch 5000 -pdf_periodic -sig_len 64 -mask_len 24 -mid_size 100 -mode_sig tri -num_meas 50000 -seed 0
+python main_wpdf.py -lrate 0.005 -batch_size 200 -gumbel -num_epoch 5000 -pdf_periodic -sig_len 64 -mask_len 24 -mid_size 100 -mode_sig tri -num_meas 50000 -seed 0 -exp_name test_unknown
 ```
 - Fixed PMF with uniform distribution
 ```r
-python main_wpdf.py -batch_size 200 -gumbel -num_epoch 12000 -pdf_periodic -sig_len 64 -mask_len 24 -mid_size 100 -expName exp10_1 -mode_sig tri -num_meas 50000 -seed 0 -unif_pdf
+python main_wpdf.py -batch_size 200 -gumbel -num_epoch 12000 -pdf_periodic -sig_len 64 -mask_len 24 -mid_size 100 -mode_sig tri -num_meas 50000 -seed 0 -unif_pdf -exp_name test_fixed
 ```
 - Known PMF
 ```r
