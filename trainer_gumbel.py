@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import scipy.io
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -10,6 +11,9 @@ from utils import *
 
 
 class signalClass(nn.Module):
+    """
+    The signal class
+    """
     def __init__(self, args):
         super().__init__()
         self.args = args
@@ -28,10 +32,6 @@ class TrainerWithPDFGumbel(TrainerAbstract):
         TrainerAbstract.__init__(self, net, meas, dataloader, args)
         self.x = signalClass(self.args)
         self.optim_x = optim.SGD(self.x.parameters(), lr=self.args.lrate_x, weight_decay=self.args.wdecay, momentum=0.9)
-        if self.args.periodic:
-            self.a = torch.rand(self.args.a_size,).float()
-            self.a.requires_grad = True
-            self.x = sig_from_a(self.a, self.args.sig_len)
 
     def train_epoch(self, x_true, p_true):
         """
@@ -93,7 +93,7 @@ class TrainerWithPDFGumbel(TrainerAbstract):
 
                 if (self.iteration%self.args.iterLog==0):
                     self.log()
-                    # save the results
+                    # save the intermediate results
                     self.recon_x[:, epoch//self.args.iterLog] = self.x.sig.detach().cpu().numpy()
                     if not self.args.correct_pdf and not self.args.unif_pdf:
                         self.recon_pdf[:, epoch//self.args.iterLog] = self.pdf.detach().cpu().numpy()
@@ -102,7 +102,7 @@ class TrainerWithPDFGumbel(TrainerAbstract):
                     savedict['recon_pdf'] = self.recon_pdf
                     savedict['gt_x'] = x_true
                     savedict['gt_pdf'] = p_true
-                    scipy.io.savemat(savedict, os.path.join('./results', self.args.expName + '.mat'))
+                    scipy.io.savemat(os.path.join('./results', self.args.exp_name + '.mat'), savedict)
 
             if epoch%2000==0:
                 self.args.tau = max(0.5, np.exp(-3e-5*epoch))
@@ -114,17 +114,19 @@ class TrainerWithPDFGumbel(TrainerAbstract):
                 x_pred = self.x.sig.detach().cpu().numpy()
                 p_pred = self.pdf.detach().numpy()
 
-                figure, sig_aligned = find_dist_pdf(x_pred, x_true,  p_pred, p_true, self.args.expName)
+                figure, sig_aligned = find_dist_pdf(x_pred, x_true,  p_pred, p_true, self.args.exp_name)
                 err_sig = np.linalg.norm(x_true-sig_aligned)/np.linalg.norm(x_true)
                 plt.title('epoch=%d' %epoch)
                 self.logger_tf.add_figure(str(epoch), figure, global_step=epoch)
                 plt.close()
-                print('Figure printed!')
                 self.logger_tf.add_scalar('MSE', err_sig, epoch)
+                self.logger_tf.add_scalar('lr-disc', self.optim_net.param_groups[0]['lr'], self.iteration)
+                self.logger_tf.add_scalar('lr-x', self.optim_x.param_groups[0]['lr'], self.iteration)
+                self.logger_tf.add_scalar('lr-pdf', self.args.lrate_pdf, self.iteration)
 
             self.logger_tf.add_scalar('loss-x', loss_x.data.cpu().numpy().item(), epoch)
-            if (epoch%1 == 0):
-                print('epoch=%d, loss_x=%f, loss_net=%f' %(epoch, loss_x.detach().cpu().numpy().item(), loss.detach().cpu().numpy().item()))
+            if (epoch%100 == 0):
+                print(self.args.exp_name+': epoch=%d, loss_x=%f, loss_net=%f' %(epoch, loss_x.detach().cpu().numpy().item(), loss.detach().cpu().numpy().item()))
 
             # changing the learning rate
             if (epoch%self.args.iterChangeLR==0):
@@ -133,7 +135,7 @@ class TrainerWithPDFGumbel(TrainerAbstract):
     def update_signal(self, epoch):
         """
         Updates the signal and the pdf
-        :return: the loss, the max gradients over the signal and the pdf
+        :return: the loss
         """
         # disable the computation of the grad wrt the discriminator network
         for param in self.net.parameters():
