@@ -6,7 +6,7 @@ MSR-GAN: Multi-Segment Reconstruction via Adversarial Learning, accepted in ICAS
 
 by Mona Zehni, Zhizhen Zhao
 
-Link to paper (arxiv):
+Link to paper (arxiv): https://arxiv.org/abs/2102.09494
 
 ## Pre-requisites
 - Pytorch, Tensorboard, Numpy, Matplotlib
@@ -28,5 +28,16 @@ python main_wpdf.py -lrate 0.004 -batch_size 200 -gumbel -num_epoch 12000 -pdf_p
 
 ## More information
 If you find this repositry helpful in your publications, please consider citing our paper.
-
+```r
+@ARTICLE{MSR-GAN,
+       author = {{Zehni}, Mona and {Zhao}, Zhizhen},
+        title = "{MSR-GAN: Multi-Segment Reconstruction via Adversarial Learning}",
+      journal = {arXiv e-prints},
+         year = 2021,
+        month = feb,
+        pages = {arXiv:2102.09494},
+archivePrefix = {arXiv},
+       eprint = {2102.09494},
+ primaryClass = {eess.SP}}
+```
 If you have any questions, please contact Mona Zehni (mzehni2@illinois.edu).
